@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open MZ - Início</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --neon: #00ffea;
+      --primary: #00d9ff;
+      --bg: #0a0a1a;
+      --card: rgba(15,15,35,0.92);
+      --text: #e0e0ff;
+      --border: rgba(0,217,255,0.4);
+      --glow: 0 0 30px rgba(0,217,255,0.5);
+      --ink-red: #ff3366;
+      --ink-blue: #00ccff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins','Segoe UI',sans-serif; }
+    body { background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; position:relative; }
+
+    .stars { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+    .star { position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:0.6; animation:twinkle 3s infinite alternate; }
+    @keyframes twinkle { to { opacity:1; transform:scale(1.5); } }
+    .particle { position:fixed; width:2px; height:2px; background:var(--neon); border-radius:50%; opacity:0.5; pointer-events:none; z-index:-1; animation:float 6s infinite ease-in-out; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+
+    .back-btn, .toggle-btn {
+      position:fixed; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      background:rgba(0,217,255,0.15); border:1px solid var(--neon); color:var(--neon); cursor:pointer; font-size:1.4rem;
+      box-shadow:var(--glow); transition:0.3s; z-index:1000;
+    }
+    .back-btn { top:1rem; left:1rem; }
+    .toggle-btn { top:50%; right:0; transform:translateY(-50%); border-radius:25px 0 0 25px; width:60px; }
+    .back-btn:hover, .toggle-btn:hover { background:var(--neon); color:#000; transform:scale(1.1); }
+
+    .sidebar {
+      position:fixed; right:0; top:0; width:280px; height:100vh; background:rgba(10,10,30,0.98);
+      border-left:1px solid var(--neon); padding:2rem 1.5rem; transform:translateX(100%); transition:0.4s; z-index:999;
+      backdrop-filter:blur(15px); overflow-y:auto;
+    }
+    .sidebar.open { transform:translateX(0); }
+
+    .logo {
+      font-size:2rem; color:var(--neon); text-align:center; margin-bottom:2rem;
+      text-shadow:0 0 15px var(--neon); font-weight:600;
+    }
+
+    .nav-menu a {
+      display:flex; align-items:center; padding:0.8rem 1rem; color:var(--text); text-decoration:none;
+      border-radius:10px; margin-bottom:0.4rem; transition:0.3s; font-weight:500;
+    }
+    .nav-menu a:hover, .nav-menu a.active {
+      background:rgba(0,217,255,0.2); color:var(--neon); transform:translateX(-4px);
+    }
+    .nav-menu a i {
+      margin-right:10px; width:18px; text-align:center;
+    }
+
+    .publish-btn {
+      background:linear-gradient(135deg,var(--neon),var(--primary)); color:#000; font-weight:700;
+      padding:1rem; border-radius:50px; display:flex; align-items:center; justify-content:center; gap:10px;
+      margin:1.5rem auto 0.5rem; width:85%; font-size:1rem; text-transform:uppercase; letter-spacing:1px;
+      box-shadow:0 0 30px rgba(0,255,234,0.5); transition:0.3s; text-decoration:none;
+    }
+    .publish-btn:hover { transform:scale(1.05); box-shadow:0 0 45px rgba(0,255,234,0.7); }
+
+    .history-section { text-align:center; margin:3rem auto 1rem; max-width:900px; }
+    .eyes-title {
+      font-size:1.8rem; font-weight:900; text-transform:uppercase; letter-spacing:5px;
+      background:linear-gradient(135deg,var(--ink-red),var(--ink-blue));
+      -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+      padding:0.8rem 2rem; display:inline-block;
+    }
+    .story-circles {
+      display:flex; justify-content:flex-start; gap:1.2rem; margin:1.8rem auto 0; padding-left:10%;
+      max-width:900px; overflow-x:auto; scrollbar-width:none; flex-wrap:nowrap;
+    }
+    .story-circles::-webkit-scrollbar { display:none; }
+    .story-item { flex-shrink:0; text-align:center; cursor:pointer; }
+    .story-circle {
+      width:110px; height:110px; border-radius:50%; background-size:cover; background-position:center;
+      border:3px solid transparent; position:relative; transition:0.4s;
+      box-shadow:0 0 25px rgba(0,204,255,0.4); margin:0 auto 0.5rem;
+    }
+    .story-circle:hover { transform:scale(1.08); }
+    .story-circle.add-photo {
+      background:rgba(255,255,255,0.08); border:3px dashed rgba(0,204,255,0.6);
+      color:var(--neon); font-size:2.5rem; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(8px);
+    }
+    .story-author {
+      font-size:0.8rem; color:var(--primary); font-weight:600; margin-top:0.3rem;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px;
+      cursor:pointer;
+    }
+    .story-avatar { 
+      width:24px; height:24px; border-radius:50%; object-fit:cover; border:2px solid var(--neon); 
+      margin-right:6px; vertical-align:middle;
+    }
+
+    .history-line {
+      width:75%; height:2px; background:linear-gradient(90deg,transparent,var(--neon),transparent);
+      margin:1.8rem auto 0; border-radius:2px;
+    }
+
+    /* === NOVA SEÇÃO: PUBLICAÇÕES === */
+    .posts-section {
+      text-align: center;
+      margin: 4rem auto 2rem;
+      max-width: 900px;
+      padding: 0 1rem;
+    }
+    .posts-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      background: linear-gradient(135deg, var(--neon), var(--primary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      padding: 0.8rem 2rem;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 20px rgba(0, 255, 234, 0.4);
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      perspective: 1200px;
+    }
+    .photo-item { text-align:center; position:relative; }
+    .photo-4d {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      cursor: grab;
+      user-select: none;
+      transform-style: preserve-3d;
+    }
+    .photo-4d:active { cursor: grabbing; }
+
+    .photo-4d img {
+      width: 100%;
+      height: 300px;
+      display: block;
+      object-fit: cover;
+      border-radius: 24px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+
+    .photo-actions {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      z-index: 10;
+      pointer-events: auto;
+    }
+    .photo-action {
+      width: 38px; height: 38px;
+      background: rgba(10,10,30,0.92);
+      border: 1px solid rgba(0,217,255,0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ccc;
+      font-size: 1.05rem;
+      backdrop-filter: blur(8px);
+      transition: 0.2s;
+    }
+    .photo-action:hover { color: var(--neon); transform: scale(1.15); background: rgba(0,217,255,0.25); }
+    .photo-action.star.active { color: #ffcc00; }
+    .photo-action span {
+      position: absolute;
+      top: -6px; right: -6px;
+      font-size: 0.65rem;
+      background: var(--ink-red);
+      color: white;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: 0.2s;
+    }
+    .photo-action.active span { opacity: 1; }
+
+    .delete-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px; height: 36px;
+      background: rgba(255,51,102,0.95);
+      border: 2px solid var(--ink-red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 11;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 15px rgba(255,51,102,0.5);
+    }
+    .photo-item:hover .delete-btn { opacity: 1; }
+    .delete-btn:hover { background: var(--ink-red); transform: scale(1.2); box-shadow: 0 0 25px rgba(255,51,102,0.8); }
+
+    .photo-caption {
+      margin-top: 0.8rem;
+      color: var(--text);
+      font-size: 0.88rem;
+      text-align: center;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+      max-height: 2.4em;
+      line-height: 1.4;
+      padding: 0 1rem;
+    }
+
+    .post-author {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      margin-top:0.6rem; font-size:0.88rem; color:var(--primary); font-weight:600;
+    }
+    .post-avatar {
+      width:30px; height:30px; border-radius:50%; object-fit:cover; border:2px solid var(--neon);
+    }
+
+    .post-modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.96); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 20000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+    }
+    .post-modal.open { opacity: 1; visibility: visible; }
+
+    .post-modal-content {
+      width: 90%; max-width: 600px; max-height: 90vh;
+      background: transparent; display: flex; flex-direction: column;
+      align-items: center; gap: 1rem;
+    }
+
+    .post-modal-img {
+      max-width: 100%; max-height: 70vh; object-fit: contain;
+      border-radius: 20px; box-shadow: 0 0 40px rgba(0,255,234,0.4);
+    }
+
+    .post-actions {
+      display: flex; gap: 1.8rem; align-items: center;
+      background: rgba(10,10,30,0.9); padding: 0.8rem 1.5rem;
+      border-radius: 50px; backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,217,255,0.3);
+    }
+    .action-btn {
+      color: #ccc; font-size: 1.4rem; cursor: pointer; transition: 0.2s; position: relative;
+    }
+    .action-btn:hover { color: var(--neon); transform: scale(1.2); }
+    .action-btn.star.active { color: #ffcc00; }
+    .action-btn span {
+      position: absolute; top: -8px; right: -8px; font-size: 0.7rem;
+      background: var(--ink-red); color: white; width: 16px; height: 16px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: 0.2s;
+    }
+    .action-btn.active span { opacity: 1; }
+
+    .post-caption-full {
+      background: rgba(10,10,30,0.9); color: var(--text);
+      padding: 1rem 1.5rem; border-radius: 16px; font-size: 0.95rem;
+      text-align: center; max-width: 90%; backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,217,255,0.2); line-height: 1.5;
+    }
+
+    .close-modal {
+      position: absolute; top: 20px; right: 20px; width: 40px; height: 40px;
+      background: rgba(255,51,102,0.3); border: 2px solid var(--ink-red);
+      border-radius: 50%; color: var(--ink-red); font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: 0.3s;
+    }
+    .close-modal:hover { background: var(--ink-red); color: white; transform: rotate(90deg); }
+
+    @media (max-width: 768px) {
+      .photo-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .photo-actions { right: 8px; gap: 0.7rem; }
+      .photo-action { width: 34px; height: 34px; font-size: 0.95rem; }
+      .photo-caption { font-size: 0.82rem; }
+      .sidebar { width: 260px; padding: 1.5rem 1rem; }
+      .nav-menu a { padding: 0.7rem 0.9rem; font-size: 0.9rem; }
+      .posts-title {
+        font-size: 1.5rem;
+        letter-spacing: 3px;
+        padding: 0.6rem 1.5rem;
+      }
+      .posts-section {
+        margin: 3rem auto 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="back-btn" onclick="goBackToSPA()">Voltar</div>
+  <div class="toggle-btn" id="toggleBtn">Menu</div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">OPEN MZ</div>
+    <div class="nav-menu">
+      <a href="#" onclick="safeNavigate('menu1.1.1.html'); return false;" class="active"><i class="fas fa-home"></i> Início</a>
+      <a href="#" onclick="safeNavigate('abra.html'); return false;"><i class="fas fa-eye"></i> Abra os Olhos</a>
+      <a href="#" onclick="safeNavigate('perfil.html'); return false;"><i class="fas fa-user"></i> Perfil</a>
+      <a href="#" onclick="safeNavigate('artigos.html'); return false;"><i class="fas fa-newspaper"></i> Artigos</a>
+      <a href="#" onclick="safeNavigate('videos.html'); return false;"><i class="fas fa-video"></i> Vídeos</a>
+      <a href="#" onclick="safeNavigate('conversas.html'); return false;"><i class="fas fa-comments"></i> Conversas</a>
+      <a href="#" onclick="safeNavigate('eventos.html'); return false;"><i class="fas fa-calendar"></i> Eventos</a>
+      <a href="#" onclick="safeNavigate('loja.html'); return false;"><i class="fas fa-store"></i> Loja</a>
+      <a href="#" onclick="safeNavigate('cinema.html'); return false;"><i class="fas fa-film"></i> Cinema</a>
+      <a href="#" onclick="safeNavigate('fonte.html'); return false;"><i class="fas fa-font"></i> Fonte de Letra</a>
+      <a href="#" onclick="safeNavigate('musica.html'); return false;"><i class="fas fa-music"></i> Música</a>
+      <a href="#" onclick="safeNavigate('comunidade.html'); return false;"><i class="fas fa-users"></i> Comunidade</a>
+      <a href="#" onclick="safeNavigate('config.html'); return false;"><i class="fas fa-cog"></i> Configurações</a>
+      <a href="#" onclick="openPublicar(); return false;" class="publish-btn">Publicar</a>
+    </div>
+  </aside>
+
+  <div class="post-modal" id="postModal">
+    <div class="close-modal" onclick="closePostModal()">X</div>
+    <div class="post-modal-content">
+      <img class="post-modal-img" id="modalImg" src="" alt="">
+      <div class="post-actions" id="modalActions"></div>
+      <div class="post-caption-full" id="modalCaption"></div>
+    </div>
+  </div>
+
+  <!-- EYES 42H -->
+  <section class="history-section">
+    <div class="eyes-title">Eyes 42h</div>
+    <div class="story-circles" id="storyCircles"></div>
+    <div class="history-line"></div>
+  </section>
+
+  <!-- PUBLICAÇÕES -->
+  <section class="posts-section">
+    <div class="posts-title">Publicações</div>
+    <div class="photo-grid" id="photoGrid"></div>
+  </section>
+
+  <script>
+    const POSTS_KEY = 'posts_menu_1_1_1';
+    const STORIES_KEY = 'eyes42h_stories';
+    const CURRENT_USER_ID = 'user1';
+    let posts = [], stories = [];
+
+    function openPublicar() { safeNavigate('publicar.html'); }
+    function goBackToSPA() { safeNavigate('eyesopenmoz.html'); }
+    function safeNavigate(page) {
+      try { window.location.href = page; } 
+      catch (e) { console.error(e); alert(`Erro: ${page} não encontrado`); }
+    }
+
+    function openUserProfile(id) { alert(`Perfil: ${id}`); }
+
+    const getStories = () => { try { return JSON.parse(localStorage.getItem(STORIES_KEY) || '[]'); } catch { return []; }};
+    const saveStories = (s) => localStorage.setItem(STORIES_KEY, JSON.stringify(s));
+
+    function renderStories() {
+      const c = document.getElementById('storyCircles'); 
+      stories = getStories(); 
+      c.innerHTML = '';
+
+      const add = document.createElement('div'); 
+      add.className = 'story-item';
+      add.innerHTML = `<div class="story-circle add-photo">+</div>`;
+      add.onclick = () => safeNavigate('Eyes42h.html'); 
+      c.appendChild(add);
+
+      stories.slice(0, 5).forEach((st, i) => {
+        const item = document.createElement('div'); 
+        item.className = 'story-item';
+        item.onclick = () => openStoryModal(i);
+
+        const author = st.author || { name: 'Anônimo', avatar: 'https://i.pravatar.cc/150?img=1', id: 'anon' };
+
+        item.innerHTML = `
+          <div class="story-circle" style="background-image:url('${st.src}')"></div>
+          <div class="story-author" onclick="event.stopPropagation(); openUserProfile('${author.id}')">
+            <img class="story-avatar" src="${author.avatar}" alt="">
+            ${author.name}
+          </div>
+        `;
+        c.appendChild(item);
+      });
+    }
+
+    function openStoryModal(i) {
+      const s = stories[i];
+      document.getElementById('modalImg').src = s.src;
+      document.getElementById('modalCaption').innerHTML = s.text ? 
+        `<div style="font-family:'${s.style?.font||'Poppins'}'; color:${s.style?.color||'#fff'};">${s.text}</div>` : '';
+      document.getElementById('modalActions').innerHTML = `
+        <div class="action-btn star ${s.starred ? 'active' : ''}" onclick="toggleStar(${i}, 'story')"><i class="fas fa-star"></i><span>${s.stars || 0}</span></div>
+        <div class="action-btn"><i class="fas fa-eye"></i><span>${(s.views || 0) + 1}</span></div>
+        <div class="action-btn" onclick="shareItem(${i}, 'story')"><i class="fas fa-share"></i></div>
+      `;
+      s.views = (s.views || 0) + 1;
+      saveStories(stories);
+      document.getElementById('postModal').classList.add('open');
+    }
+
+    function add4DFullRotation(el) {
+      let isDown = false, startX, startY, rotX = 0, rotY = 0, velX = 0, velY = 0, raf;
+
+      const animate = () => {
+        if (Math.abs(velX) > 0.01 || Math.abs(velY) > 0.01) {
+          velX *= 0.94; velY *= 0.94;
+          rotX += velX; rotY += velY;
+          el.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+          raf = requestAnimationFrame(animate);
+        }
+      };
+
+      const down = e => {
+        isDown = true;
+        cancelAnimationFrame(raf);
+        const t = e.touches ? e.touches[0] : e;
+        startX = t.clientX; startY = t.clientY;
+        el.style.transition = 'none';
+      };
+
+      const move = e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const t = e.touches ? e.touches[0] : e;
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        velX = dy * 0.08;
+        velY = dx * 0.08;
+        rotX += dy * 0.25;
+        rotY += dx * 0.25;
+        el.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+        startX = t.clientX; startY = t.clientY;
+      };
+
+      const up = () => {
+        if (!isDown) return;
+        isDown = false;
+        el.style.transition = 'transform 0.3s ease-out';
+        if (Math.abs(velX) > 0.1 || Math.abs(velY) > 0.1) raf = requestAnimationFrame(animate);
+      };
+
+      el.addEventListener('mousedown', down);
+      el.addEventListener('touchstart', down, {passive:false});
+      el.addEventListener('mousemove', move);
+      el.addEventListener('touchmove', move, {passive:false});
+      el.addEventListener('mouseup', up);
+      el.addEventListener('touchend', up);
+      el.addEventListener('mouseleave', up);
+    }
+
+    function loadPosts() {
+      try { 
+        posts = JSON.parse(localStorage.getItem(POSTS_KEY) || '[]'); 
+      } catch (e) { 
+        console.error("Erro ao carregar posts:", e);
+        posts = []; 
+      }
+      if (posts.length === 0) {
+        // DADOS DE EXEMPLO PARA TESTE
+        posts = [
+          { image: 'https://via.placeholder.com/300x300?text=Pub+1', text: 'Exemplo de publicação 1', author: { name: 'Alex MZ', avatar: 'https://i.pravatar.cc/150?img=1', id: 'user1' }, views: 10, stars: 5, starred: true },
+          { text: 'Texto simples sem imagem', style: { font: 'Poppins', color: '#00ffea' }, author: { name: 'Anônimo', id: 'anon' }, views: 5, stars: 2 },
+          { image: 'https://via.placeholder.com/300x300?text=Pub+3', author: { name: 'Alex MZ', avatar: 'https://i.pravatar.cc/150?img=1', id: 'user1' }, views: 15, stars: 8 }
+        ];
+        localStorage.setItem(POSTS_KEY, JSON.stringify(posts));
+      }
+      renderPosts();
+    }
+
+    function renderPosts() {
+      const photoGrid = document.getElementById('photoGrid');
+      photoGrid.innerHTML = '';
+
+      posts.forEach((p, i) => {
+        if (p.image || p.text) {
+          const item = document.createElement('div'); 
+          item.className = 'photo-item';
+          item.onclick = (e) => { 
+            if (!e.target.closest('.photo-action') && !e.target.closest('.delete-btn')) 
+              openPostModal(i); 
+          };
+
+          const wrapper = document.createElement('div'); 
+          wrapper.className = 'photo-4d';
+          wrapper.style.position = 'relative';
+
+          if (p.image) {
+            const img = document.createElement('img'); 
+            img.src = p.image; img.alt = 'Foto';
+            wrapper.appendChild(img);
+          }
+
+          const actions = document.createElement('div'); 
+          actions.className = 'photo-actions';
+          actions.innerHTML = `
+            <div class="photo-action star ${p.starred ? 'active' : ''}" onclick="event.stopPropagation(); toggleStar(${i}, 'post')">
+              <i class="fas fa-star"></i><span>${p.stars || 0}</span>
+            </div>
+            <div class="photo-action"><i class="fas fa-eye"></i><span>${p.views || 0}</span></div>
+            <div class="photo-action" onclick="event.stopPropagation(); shareItem(${i}, 'post')"><i class="fas fa-share"></i></div>
+          `;
+          wrapper.appendChild(actions);
+
+          if (p.author?.id === CURRENT_USER_ID) {
+            const deleteBtn = document.createElement('div');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.onclick = (e) => {
+              e.stopPropagation();
+              deletePost(i);
+            };
+            wrapper.appendChild(deleteBtn);
+          }
+
+          if (p.text) {
+            const caption = document.createElement('div'); 
+            caption.className = 'photo-caption';
+            caption.innerHTML = `<div style="font-family:'${p.style?.font||'Poppins'}'; color:${p.style?.color||'#fff'};">${p.text}</div>`;
+            item.appendChild(caption);
+          }
+
+          const authorDiv = document.createElement('div'); 
+          authorDiv.className = 'post-author';
+          authorDiv.onclick = (e) => { e.stopPropagation(); openUserProfile(p.author?.id || 'anon'); };
+          authorDiv.innerHTML = `
+            <img class="post-avatar" src="${p.author?.avatar || 'https://i.pravatar.cc/150?img=1'}" alt="">
+            <span>${p.author?.name || 'Anônimo'}</span>
+          `;
+          item.appendChild(authorDiv);
+
+          item.appendChild(wrapper);
+          photoGrid.appendChild(item);
+
+          if (p.image) add4DFullRotation(wrapper);
+        }
+      });
+    }
+
+    function deletePost(index) {
+      if (confirm('Tem certeza que deseja eliminar esta publicação?')) {
+        const post = posts[index];
+        if (post.author?.id !== CURRENT_USER_ID) {
+          alert('Você só pode eliminar suas próprias publicações!');
+          return;
+        }
+        posts.splice(index, 1);
+        localStorage.setItem(POSTS_KEY, JSON.stringify(posts));
+        renderPosts();
+      }
+    }
+
+    function openPostModal(i) {
+      const p = posts[i];
+      document.getElementById('modalImg').src = p.image || '';
+      document.getElementById('modalCaption').innerHTML = p.text ? 
+        `<div style="font-family:'${p.style?.font||'Poppins'}'; color:${p.style?.color||'#fff'};">${p.text}</div>` : '';
+      document.getElementById('modalActions').innerHTML = `
+        <div class="action-btn star ${p.starred ? 'active' : ''}" onclick="toggleStar(${i}, 'post')"><i class="fas fa-star"></i><span>${p.stars || 0}</span></div>
+        <div class="action-btn"><i class="fas fa-eye"></i><span>${(p.views || 0) + 1}</span></div>
+        <div class="action-btn" onclick="shareItem(${i}, 'post')"><i class="fas fa-share"></i></div>
+      `;
+      p.views = (p.views || 0) + 1;
+      localStorage.setItem(POSTS_KEY, JSON.stringify(posts));
+      document.getElementById('postModal').classList.add('open');
+    }
+
+    function toggleStar(i, type) {
+      const arr = type === 'story' ? stories : posts;
+      const item = arr[i];
+      item.stars = (item.stars || 0) + (item.starred ? -1 : 1);
+      item.starred = !item.starred;
+      localStorage.setItem(type === 'story' ? STORIES_KEY : POSTS_KEY, JSON.stringify(arr));
+      if (type === 'story') renderStories(); else renderPosts();
+    }
+
+    function shareItem(i, type) { alert(`Compartilhado!`); }
+    function closePostModal() { document.getElementById('postModal').classList.remove('open'); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // DADOS DE EXEMPLO PARA STORIES
+      if (getStories().length === 0) {
+        stories = [
+          { src: 'https://via.placeholder.com/110x110?text=Story+1', text: 'Exemplo de story 1', author: { name: 'Alex MZ', avatar: 'https://i.pravatar.cc/150?img=1', id: 'user1' } },
+          { src: 'https://via.placeholder.com/110x110?text=Story+2', author: { name: 'Anônimo', id: 'anon' } }
+        ];
+        saveStories(stories);
+      }
+
+      renderStories(); 
+      loadPosts();
+      document.getElementById('toggleBtn').onclick = () => document.getElementById('sidebar').classList.toggle('open');
+
+      const stars = document.getElementById('stars');
+      for(let i=0; i<15; i++){
+        const s = document.createElement('div'); 
+        s.className = 'star';
+        s.style.left = Math.random()*100 + '%'; 
+        s.style.top = Math.random()*100 + '%';
+        s.style.animationDelay = Math.random()*3 + 's'; 
+        stars.appendChild(s);
+      }
+
+      for(let i=0; i<10; i++){
+        const p = document.createElement('div'); 
+        p.className = 'particle';
+        p.style.left = Math.random()*100 + '%'; 
+        p.style.top = Math.random()*100 + '%';
+        p.style.animationDelay = Math.random()*5 + 's'; 
+        document.body.appendChild(p);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open MZ - Perfil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --neon: #00ffea;
+      --bg: #0a0a1a;
+      --card: rgba(15,15,35,0.92);
+      --text: #e0e0ff;
+      --border: rgba(0,217,255,0.4);
+      --glow: 0 0 30px rgba(0,217,255,0.5);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins','Segoe UI',sans-serif; }
+    body { background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; position:relative; }
+    
+    .stars { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+    .star { position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:0.6; animation:twinkle 3s infinite alternate; }
+    @keyframes twinkle { to { opacity:1; transform:scale(1.5); } }
+    .particle { position:fixed; width:2px; height:2px; background:var(--neon); border-radius:50%; opacity:0.5; pointer-events:none; z-index:-1; animation:float 6s infinite ease-in-out; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+
+    .back-btn, .toggle-btn {
+      position:fixed; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      background:rgba(0,217,255,0.15); border:1px solid var(--neon); color:var(--neon); cursor:pointer; font-size:1.4rem;
+      box-shadow:var(--glow); transition:0.3s; z-index:1000;
+    }
+    .back-btn { top:1rem; left:1rem; }
+    .toggle-btn { top:50%; right:0; transform:translateY(-50%); border-radius:25px 0 0 25px; width:60px; }
+    .back-btn:hover, .toggle-btn:hover { background:var(--neon); color:#000; transform:scale(1.1); }
+
+    .sidebar {
+      position:fixed; right:0; top:0; width:280px; height:100vh; background:rgba(10,10,30,0.98);
+      border-left:1px solid var(--neon); padding:2rem 1.5rem; transform:translateX(100%); transition:0.4s; z-index:999;
+      backdrop-filter:blur(15px); overflow-y:auto;
+    }
+    .sidebar.open { transform:translateX(0); }
+    .logo { font-size:2rem; color:var(--neon); text-align:center; margin-bottom:2rem; text-shadow:0 0 15px var(--neon); font-weight:600; }
+    .nav-menu a {
+      display:flex; align-items:center; padding:0.8rem 1rem; color:var(--text); text-decoration:none;
+      border-radius:10px; margin-bottom:0.4rem; transition:0.3s; font-weight:500;
+    }
+    .nav-menu a:hover, .nav-menu a.active { background:rgba(0,217,255,0.2); color:var(--neon); transform:translateX(-4px); }
+    .nav-menu a i { margin-right:10px; width:18px; text-align:center; }
+
+    .profile-card {
+      max-width:500px; margin:5rem auto 2rem; padding:2rem; background:var(--card); border-radius:16px;
+      text-align:center; border:1.5px solid var(--border); box-shadow:var(--glow); position:relative; overflow:hidden;
+    }
+    .ripple { position:absolute; border-radius:50%; background:rgba(0,255,234,0.15); transform:scale(0); animation:ripple 1s ease-out; pointer-events:none; }
+    @keyframes ripple { to { transform:scale(4); opacity:0; } }
+
+    .avatar-container {
+      width:140px; height:140px; margin:0 auto 1.5rem; position:relative; perspective:1000px;
+    }
+    .avatar-flip { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform 1s ease; }
+    .avatar-flip.flipped { transform:rotateY(180deg); }
+    .avatar-face {
+      position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:50%;
+      overflow:hidden; border:4px solid var(--neon); box-shadow:0 0 25px var(--neon);
+    }
+    .avatar-back {
+      transform:rotateY(180deg); background:rgba(10,10,30,0.95); display:flex; flex-direction:column;
+      justify-content:center; align-items:center; color:var(--neon);
+    }
+    .avatar-back .level { font-size:2rem; font-weight:900; }
+    .avatar-back .role { font-size:0.9rem; color:#aaa; text-transform:uppercase; margin-top:0.2rem; }
+
+    .username { font-size:1.8rem; color:var(--neon); margin:1rem 0; font-weight:600; }
+    .title { font-size:1.1rem; color:#ffdd00; margin-bottom:1rem; font-weight:500; }
+
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1.5rem 0; }
+    .stat-num { font-size:1.4rem; font-weight:bold; }
+    .stat-label { font-size:0.8rem; color:#aaa; }
+
+    .status { color:#00ff88; font-weight:600; margin:1rem 0; }
+
+    .graph { height:140px; margin:2rem 0; padding:1rem; background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid rgba(0,255,234,0.2); }
+    .graph-title { font-size:1.2rem; color:var(--neon); margin-bottom:0.8rem; text-shadow:0 0 8px var(--neon); font-weight:500; }
+    .line-svg { width:100%; height:100px; }
+
+    .profession {
+      margin-top:1.5rem; padding:1rem; background:rgba(0,0,0,0.4); border-radius:12px; border:1px solid var(--neon);
+    }
+    .profession-title { font-size:1.6rem; font-weight:900; color:var(--neon); margin:0.5rem 0; }
+    .profession-desc { font-size:0.95rem; color:#ccc; margin:0.6rem 0; font-style:italic; }
+    .profession-level { font-size:2.2rem; font-weight:900; animation:pulse 2s infinite; }
+    @keyframes pulse { 50% { transform:scale(1.05); } }
+
+    @media (max-width:768px) {
+      .profile-card { margin:4rem 1rem 2rem; padding:1.5rem; }
+      .avatar-container { width:120px; height:120px; }
+      .username { font-size:1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></div>
+  <div class="toggle-btn" id="toggleBtn"><i class="fas fa-chevron-left"></i></div>
+
+  <!-- Sidebar com "ABRA OS OLHOS" -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">OPEN MZ</div>
+    <div class="nav-menu">
+      <a href="#" onclick="load('home')"><i class="fas fa-home"></i> Início</a>
+
+      <!-- NOVA OPÇÃO: ABRA OS OLHOS -->
+      <a href="#" onclick="openAbra(); return false;"><i class="fas fa-eye"></i> Abra os Olhos</a>
+
+      <a href="#" class="active"><i class="fas fa-user"></i> Perfil</a>
+      <a href="#" onclick="load('artigos')"><i class="fas fa-newspaper"></i> Artigos</a>
+      <a href="#" onclick="load('videos')"><i class="fas fa-video"></i> Vídeos</a>
+      <a href="#" onclick="load('conversas')"><i class="fas fa-comments"></i> Conversas</a>
+      <a href="#" onclick="load('eventos')"><i class="fas fa-calendar"></i> Eventos</a>
+      <a href="#" onclick="load('loja')"><i class="fas fa-store"></i> Loja</a>
+      <a href="#" onclick="load('cinema')"><i class="fas fa-film"></i> Cinema</a>
+      <a href="#" onclick="load('fonte')"><i class="fas fa-font"></i> Fonte de Letra</a>
+      <a href="#" onclick="load('musica')"><i class="fas fa-music"></i> Música</a>
+      <a href="#" onclick="load('comunidade')"><i class="fas fa-users"></i> Comunidade</a>
+      <a href="#" onclick="load('config')"><i class="fas fa-cog"></i> Configurações</a>
+    </div>
+  </aside>
+
+  <!-- Perfil -->
+  <main>
+    <div class="profile-card" id="profileCard">
+      <div class="avatar-container">
+        <div class="avatar-flip" id="avatarFlip">
+          <div class="avatar-face"><img src="https://i.pravatar.cc/150?img=1" alt="Avatar"></div>
+          <div class="avatar-face avatar-back">
+            <div class="level">PRO</div>
+            <div class="role">Diretor</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="username">Alex MZ</div>
+      <div class="title">Diretor de Produção</div>
+
+      <div class="stats">
+        <div><div class="stat-num">1.2K</div><div class="stat-label">Likes</div></div>
+        <div><div class="stat-num">5.6K</div><div class="stat-label">Views</div></div>
+        <div><div class="stat-num">342</div><div class="stat-label">Amigos</div></div>
+      </div>
+
+      <div class="status">Conta Ativa</div>
+      <i class="fas fa-shield-alt" style="font-size:4rem; color:var(--neon); margin:1rem 0; text-shadow:0 0 30px var(--neon);"></i>
+
+      <div class="graph">
+        <div class="graph-title">Interação (7 dias)</div>
+        <svg class="line-svg" id="lineChart"></svg>
+      </div>
+
+      <div class="profession">
+        <div class="profession-title">Diretor de Cinema</div>
+        <div class="profession-desc">Cria filmes, séries e conteúdos com visão artística e técnica.</div>
+        <div class="profession-level" style="color:#ff00ff">PRO</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const prof = { title: "Diretor de Cinema", desc: "Cria filmes, séries e conteúdos com visão artística e técnica.", level: "PRO", role: "Diretor" };
+
+    function drawGraph() {
+      const svg = document.getElementById('lineChart');
+      const w = 500, h = 100, p = 15;
+      const data = [120,280,450,620,580,720,680];
+      const max = 720, min = 100;
+      const xStep = (w - p*2) / (data.length-1);
+      const yScale = (h - p*2) / (max - min);
+      let path = `M ${p} ${h-p - (data[0]-min)*yScale}`;
+      data.forEach((d,i) => { if(i>0) path += ` L ${p + i*xStep} ${h-p - (d-min)*yScale}`; });
+      svg.innerHTML = `<path d="${path}" fill="none" stroke="#00ffea" stroke-width="2"/>`;
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    }
+
+    let flipInt;
+    function startFlip() {
+      const flip = document.getElementById('avatarFlip');
+      let front = true;
+      flipInt = setInterval(() => {
+        front = !front;
+        flip.classList.toggle('flipped', !front);
+      }, 12000);
+    }
+
+    function ripple(e) {
+      const card = document.getElementById('profileCard');
+      const r = document.createElement('div');
+      r.className = 'ripple';
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      const size = Math.max(rect.width, rect.height);
+      r.style.width = r.style.height = size + 'px';
+      r.style.left = x - size/2 + 'px';
+      r.style.top = y - size/2 + 'px';
+      card.appendChild(r);
+      setTimeout(() => r.remove(), 1000);
+    }
+
+    function goBack() { history.back(); }
+    function load(p) { /* SPA */ }
+
+    // NOVA FUNÇÃO: ABRIR ABRA OS OLHOS
+    function openAbra() {
+      window.location.href = 'abra.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      drawGraph(); startFlip();
+      document.getElementById('profileCard').addEventListener('click', ripple);
+      document.getElementById('toggleBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+      });
+
+      const stars = document.getElementById('stars');
+      for(let i=0;i<15;i++){
+        const s=document.createElement('div'); s.className='star';
+        s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+        s.style.animationDelay=Math.random()*3+'s';
+        stars.appendChild(s);
+      }
+
+      for(let i=0;i<10;i++){
+        const p=document.createElement('div'); p.className='particle';
+        p.style.left=Math.random()*100+'%'; p.style.top=Math.random()*100+'%';
+        p.style.animationDelay=Math.random()*5+'s';
+        document.body.appendChild(p);
+      }
+    });
+  </script>
+</body>
+</html>

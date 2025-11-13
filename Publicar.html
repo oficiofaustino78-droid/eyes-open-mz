@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Publicar - Open MZ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&family=Roboto&family=Arial&family=Times+New+Roman&family=Calibri&family=Georgia&family=Verdana&family=Trebuchet+MS&family=Courier+New&family=Impact&family=Comic+Sans+MS&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --neon: #00ffea;
+      --primary: #00d9ff;
+      --bg: #0a0a1a;
+      --text: #e0e0ff;
+      --ink-red: #ff3366;
+      --ink-blue: #00ccff;
+      --cyber-purple: #9d00ff;
+      --cyber-pink: #ff00aa;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+    body { background:var(--bg); color:var(--text); min-height:100vh; overflow-y:auto; position:relative; }
+
+    .stars { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
+    .star { position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:0.6; animation:twinkle 3s infinite alternate; }
+    @keyframes twinkle { to { opacity:1; transform:scale(1.5); } }
+
+    .back-btn {
+      position:fixed; top:1rem; left:1rem; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      background:rgba(0,217,255,0.15); border:1px solid var(--neon); color:var(--neon); cursor:pointer; font-size:1.4rem;
+      box-shadow:0 0 25px rgba(0,217,255,0.4); transition:0.3s; z-index:1000;
+    }
+    .back-btn:hover { background:var(--neon); color:#000; transform:scale(1.1); }
+
+    .container {
+      max-width: 600px; margin: 2rem auto; padding: 0 1rem;
+    }
+
+    .publish-card {
+      background: rgba(10,10,30,0.95); border:1px solid var(--neon); border-radius:20px;
+      padding:1.8rem; backdrop-filter:blur(15px); box-shadow:0 0 40px rgba(0,255,234,0.2);
+    }
+
+    .title {
+      font-size:1.8rem; color:var(--neon); text-align:center; margin-bottom:1.5rem;
+      text-shadow:0 0 15px var(--neon); font-weight:700;
+    }
+
+    .photo-preview {
+      width:100%; height:300px; border-radius:16px; object-fit:cover; margin-bottom:1rem;
+      border:2px dashed rgba(0,255,234,0.4); display:none; box-shadow:0 0 20px rgba(0,255,234,0.3);
+    }
+    .photo-preview.show { display:block; }
+
+    .input-group { margin-bottom:1.2rem; }
+    label { display:block; color:var(--primary); font-size:0.9rem; margin-bottom:0.4rem; font-weight:600; }
+
+    textarea {
+      width:100%; height:120px; background:rgba(0,0,0,0.3); border:1px solid var(--neon); border-radius:12px;
+      padding:1rem; color:var(--text); font-size:1rem; resize:none; outline:none;
+      transition:0.3s; backdrop-filter:blur(5px);
+    }
+    textarea:focus { border-color:var(--cyber-purple); box-shadow:0 0 20px rgba(157,0,255,0.4); }
+
+    .controls { display:flex; flex-wrap:wrap; gap:0.8rem; margin:1rem 0; }
+
+    .control-btn {
+      background:rgba(0,217,255,0.15); border:1px solid var(--neon); color:var(--neon); padding:0.6rem 1rem;
+      border-radius:50px; font-size:0.85rem; cursor:pointer; transition:0.3s; display:flex; align-items:center; gap:6px;
+    }
+    .control-btn:hover { background:var(--neon); color:#000; transform:scale(1.05); }
+
+    .font-select {
+      background:rgba(0,0,0,0.3); border:1px solid var(--neon); color:var(--text); padding:0.6rem 1rem;
+      border-radius:12px; font-size:0.9rem; outline:none; cursor:pointer;
+    }
+
+    .color-options {
+      display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;
+    }
+    .color-option {
+      width:32px; height:32px; border-radius:50%; cursor:pointer; border:2px solid transparent;
+      transition:0.2s;
+    }
+    .color-option:hover, .color-option.active { transform:scale(1.2); border-color:var(--neon); box-shadow:0 0 15px currentColor; }
+
+    .publish-btn {
+      background:linear-gradient(135deg,var(--neon),var(--primary)); color:#000; font-weight:700;
+      padding:1rem; border-radius:50px; display:flex; align-items:center; justify-content:center; gap:10px;
+      margin:1.5rem auto 0; width:100%; font-size:1.1rem; text-transform:uppercase; letter-spacing:1px;
+      box-shadow:0 0 30px rgba(0,255,234,0.5); transition:0.3s; cursor:pointer; border:none;
+      position:relative; overflow:hidden;
+    }
+    .publish-btn:hover { transform:scale(1.03); box-shadow:0 0 45px rgba(0,255,234,0.7); }
+    .publish-btn:disabled { opacity:0.7; cursor:not-allowed; }
+
+    .success-msg {
+      text-align:center; color:var(--neon); font-size:1.1rem; margin-top:1rem; opacity:0; 
+      transition: opacity 0.4s ease; font-weight:700; text-shadow:0 0 15px var(--neon);
+    }
+    .success-msg.show { opacity:1; }
+
+    @media (max-width: 480px) {
+      .controls { flex-direction:column; }
+      .control-btn { justify-content:center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="back-btn" onclick="goBack()">Voltar</div>
+
+  <div class="container">
+    <div class="publish-card">
+      <h1 class="title">Publicar</h1>
+
+      <div class="input-group">
+        <label>Foto (opcional)</label>
+        <input type="file" id="photoInput" accept="image/*" style="display:none;">
+        <div class="control-btn" onclick="document.getElementById('photoInput').click()">
+          Foto
+        </div>
+        <img id="photoPreview" class="photo-preview" src="" alt="">
+      </div>
+
+      <div class="input-group">
+        <label>Texto</label>
+        <textarea id="textInput" placeholder="O que estás a pensar?"></textarea>
+      </div>
+
+      <div class="controls">
+        <div>
+          <label>Fonte</label>
+          <select id="fontSelect" class="font-select">
+            <option value="Poppins">Poppins</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Calibri">Calibri</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Impact">Impact</option>
+            <option value="Comic Sans MS">Comic Sans MS</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Cor</label>
+          <div class="color-options">
+            <div class="color-option active" style="background:#ffffff" data-color="#ffffff"></div>
+            <div class="color-option" style="background:#00ffea" data-color="#00ffea"></div>
+            <div class="color-option" style="background:#00d9ff" data-color="#00d9ff"></div>
+            <div class="color-option" style="background:#9d00ff" data-color="#9d00ff"></div>
+            <div class="color-option" style="background:#ff00aa" data-color="#ff00aa"></div>
+            <div class="color-option" style="background:#ff3366" data-color="#ff3366"></div>
+            <div class="color-option" style="background:#00ccff" data-color="#00ccff"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="publish-btn" id="publishBtn" onclick="publishPost()">
+        Publicar
+      </button>
+
+      <p class="success-msg" id="successMsg">Publicado com sucesso!</p>
+    </div>
+  </div>
+
+  <script>
+    // CHAVE EXATA DO MENU
+    const STORAGE_KEY = 'posts_menu_1_1_1';
+    let selectedColor = '#ffffff';
+
+    function goBack() { window.location.href = 'menu1.1.1.html'; }
+
+    // Preview da foto
+    document.getElementById('photoInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const preview = document.getElementById('photoPreview');
+          preview.src = ev.target.result;
+          preview.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Seleção de cor
+    document.querySelectorAll('.color-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        selectedColor = opt.getAttribute('data-color');
+      });
+    });
+
+    // PUBLICAR: GUARDA → 0.5s → SUCESSO
+    function publishPost() {
+      const text = document.getElementById('textInput').value.trim();
+      const photoSrc = document.getElementById('photoPreview').src;
+      const font = document.getElementById('fontSelect').value;
+      const btn = document.getElementById('publishBtn');
+      const msg = document.getElementById('successMsg');
+
+      if (!text && !photoSrc.includes('data:image')) {
+        alert('Adicione texto ou foto!');
+        return;
+      }
+
+      // 1. DESABILITA BOTÃO
+      btn.disabled = true;
+      btn.innerHTML = 'Guardando...';
+
+      // 2. GUARDA NO LOCALSTORAGE (IMEDIATO)
+      const posts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const newPost = {
+        image: photoSrc.includes('data:image') ? photoSrc : null,
+        text: text || null,
+        style: { font, color: selectedColor },
+        author: { name: 'Você', avatar: 'https://i.pravatar.cc/150?img=2', id: 'user1' },
+        stars: 0, views: 0, starred: false,
+        timestamp: Date.now()
+      };
+      posts.unshift(newPost);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+
+      // 3. SIMULA 0.5s DE PUBLICAÇÃO
+      setTimeout(() => {
+        btn.innerHTML = 'Publicar';
+        btn.disabled = false;
+
+        // 4. MOSTRA MENSAGEM DE SUCESSO
+        msg.classList.add('show');
+        setTimeout(() => msg.classList.remove('show'), 1500);
+
+        // 5. LIMPA FORMULÁRIO
+        document.getElementById('textInput').value = '';
+        document.getElementById('photoPreview').classList.remove('show');
+        document.getElementById('photoInput').value = '';
+      }, 500); // 0.5 segundos
+    }
+
+    // Estrelas de fundo
+    document.addEventListener('DOMContentLoaded', () => {
+      for(let i=0;i<15;i++){
+        const s=document.createElement('div'); s.className='star';
+        s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%';
+        s.style.animationDelay=Math.random()*3+'s'; 
+        document.getElementById('stars').appendChild(s);
+      }
+    });
+  </script>
+</body>
+</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        

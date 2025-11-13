@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eyes Open MZ - Cadastro</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; }
+    body, html { height: 100%; overflow: hidden; background: #0a0a1a; color: #fff; display: flex; justify-content: center; align-items: center; }
+    .map-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+      background: url('Mozimagem1.jpg') center/contain no-repeat; opacity: 0.15; pointer-events: none; }
+
+    .container { position: relative; z-index: 2; width: 100%; max-width: 420px; padding: 2rem; }
+    .logo-container { text-align: center; margin-bottom: 2rem; }
+    .logo-container img { width: 120px; height: 120px; border-radius: 50%; animation: float 5s ease-in-out infinite;
+      box-shadow: 0 0 25px #00f5ff; }
+    @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
+
+    .logo { font-family: 'Orbitron', sans-serif; font-size: 3rem;
+      background: linear-gradient(90deg, #00f5ff, #ff00ff, #00ffdd); -webkit-background-clip: text; color: transparent;
+      text-shadow: 0 0 15px rgba(0,255,255,.7); }
+
+    .box { background: rgba(255,255,255,.05); backdrop-filter: blur(12px);
+      border: 1px solid rgba(0,255,255,.3); border-radius: 1.5rem; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      max-height: 80vh; overflow-y: auto; transition: all 0.3s ease; }
+
+    .input-group { position: relative; margin-bottom: 1.5rem; }
+    .input-group input, .input-group select {
+      width: 100%; padding: 1rem 1rem 1rem 2.5rem; background: rgba(255,255,255,.05);
+      border: 1px solid rgba(0,255,255,.3); border-radius: .75rem; color: #fff; font-size: 1rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: #00f5ff; outline: none; box-shadow: 0 0 10px rgba(0,255,255,.4);
+    }
+    .input-group i { position: absolute; left: 1rem; top: 1rem; color: #00f5ff; }
+
+    .btn { width: 100%; padding: 1rem; background: linear-gradient(45deg, #00f5ff, #ff00ff);
+      border: none; border-radius: .75rem; color: #fff; font-weight: 600; font-size: 1.1rem;
+      cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; margin-top: 1rem; position: relative; overflow: hidden; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,255,255,.5); }
+    .btn:after { content: ''; position: absolute; width: 100px; height: 100px; background: rgba(0,255,204,0.3);
+      border-radius: 50%; transform: scale(0); opacity: 0; pointer-events: none; animation: ripple 0.6s ease-out; }
+    @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+    .link-btn { background: none; border: none; color: #00f5ff; cursor: pointer;
+      margin-top: 1rem; display: block; text-decoration: underline; font-size: .95rem; text-align: center;
+      transition: color 0.3s ease; }
+    .link-btn:hover { color: #0ff; text-shadow: 0 0 8px #0ff; }
+
+    .message { margin-top: 1rem; padding: .6rem 1rem; border-radius: .5rem; text-align: center; font-size: .9rem; }
+    .msg-error { background: rgba(255,0,0,.3); color: #ff7777; }
+    .msg-success { background: rgba(0,255,0,.3); color: #77ff77; }
+
+    .cards { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem; }
+    .card { flex: 1 1 calc(33.33% - 10px); background: rgba(0,255,255,.05); padding: 14px; text-align: center;
+      border-radius: 10px; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; color: #00f5ff; font-weight: bold;
+      box-shadow: 0 0 10px rgba(0,255,204,0.3); }
+    .card:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,255,204,0.6); }
+
+    h2 { text-align: center; color: #00f5ff; margin-bottom: 1rem; text-shadow: 0 0 10px rgba(0,255,255,.6); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="map-bg"></div>
+
+  <div class="container">
+
+    <!-- TELA DE REGISTRO AVANÇADO -->
+    <div id="register-container">
+      <div class="logo-container">
+        <img src="Mozimagem1.jpg" alt="Mapa de Moçambique">
+        <div class="logo">Eyes Open MZ</div>
+      </div>
+      <div class="box">
+        <h2>Registar-se</h2>
+
+        <!-- 0. PROVÍNCIA -->
+        <div class="input-group">
+          <i class="fas fa-map-marker-alt"></i>
+          <label>0. Escolha sua Província</label>
+          <div class="cards" id="provinceCards">
+            <div class="card">Niassa</div>
+            <div class="card">Cabo Delgado</div>
+            <div class="card">Nampula</div>
+            <div class="card">Zambézia</div>
+            <div class="card">Tete</div>
+            <div class="card">Manica</div>
+            <div class="card">Sofala</div>
+            <div class="card">Inhambane</div>
+            <div class="card">Gaza</div>
+            <div class="card">Maputo Província</div>
+            <div class="card">Maputo Cidade</div>
+          </div>
+          <input type="hidden" id="province" required>
+        </div>
+
+        <!-- 1. TELEFONE -->
+        <div class="input-group">
+          <i class="fas fa-phone"></i>
+          <input id="phone" placeholder="1. Número (+25886xxxxxxx)" autocomplete="tel" required />
+        </div>
+
+        <!-- 2. EMAIL -->
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input id="email" type="email" placeholder="2. E-mail (válido)" required />
+        </div>
+
+        <!-- 3. NOME COMPLETO -->
+        <div class="input-group">
+          <i class="fas fa-user"></i>
+          <input id="fullname" placeholder="3. Nome completo (mín. 3 palavras)" required />
+        </div>
+
+        <!-- 4. PRIMEIRO NOME -->
+        <div class="input-group">
+          <i class="fas fa-id-card"></i>
+          <input id="firstname" placeholder="4. Primeiro nome" required />
+        </div>
+
+        <!-- 5. APELIDO -->
+        <div class="input-group">
+          <i class="fas fa-id-badge"></i>
+          <input id="surname" placeholder="5. Apelido" required />
+        </div>
+
+        <!-- 6. NICKNAME -->
+        <div class="input-group">
+          <i class="fas fa-user-astronaut"></i>
+          <input id="nickname" placeholder="6. Nickname (sem símbolos)" required />
+        </div>
+
+        <!-- 7. SENHA -->
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input id="password" type="password" placeholder="7. Senha (mín. 6 caracteres)" required />
+        </div>
+
+        <button class="btn" id="submitBtn">Criar Conta</button>
+        <button class="link-btn" onclick="showLogin()">Já tenho conta</button>
+        <div class="message" id="status">Estado: à espera de submissão.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'eyesopenmz_users_v2';
+    const allowedPrefixes = new Set(["82","83","84","85","86","87"]);
+    const provinceInput = document.getElementById('province');
+
+    // Ripple nos cards
+    document.querySelectorAll('#provinceCards .card').forEach(card => {
+      card.addEventListener('click', e => {
+        provinceInput.value = e.target.textContent;
+        const ripple = document.createElement('span');
+        ripple.style.position = 'absolute'; ripple.style.width = '100px'; ripple.style.height = '100px';
+        ripple.style.background = 'rgba(0,255,204,0.3)'; ripple.style.borderRadius = '50%';
+        ripple.style.transform = 'scale(0)'; ripple.style.pointerEvents = 'none';
+        ripple.style.top = (e.offsetY - 50) + 'px'; ripple.style.left = (e.offsetX - 50) + 'px';
+        ripple.style.animation = 'ripple 0.6s ease-out';
+        e.target.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+      });
+    });
+
+    function simpleHash(password) {
+      let hash = 0;
+      for (let i = 0; i < password.length; i++) {
+        const char = password.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash).toString(16);
+    }
+
+    function generateUniqueId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    function normalizePhone(ph) { return ph.trim(); }
+    function validatePhone(ph) {
+      ph = normalizePhone(ph);
+      if (ph.startsWith('+258')) ph = ph.slice(4);
+      if (!/^\d{9}$/.test(ph)) return { ok: false, reason: 'Número inválido. Deve ter 9 dígitos' };
+      const prefix = ph.slice(0, 2);
+      if (!allowedPrefixes.has(prefix)) return { ok: false, reason: 'Prefixo inválido em Moçambique' };
+      return { ok: true, phone: '+258' + ph, prefix };
+    }
+
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+      return re.test(email.trim()) ? { ok: true } : { ok: false, reason: 'E-mail inválido' };
+    }
+
+    function normalizeName(name) {
+      return name.trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+
+    function splitWords(s) { return s.trim().split(/\s+/).filter(Boolean); }
+    function validateNames(fullName, firstName, surname) {
+      if (!fullName || !firstName || !surname) return { ok: false, reason: 'Todos os campos de nome são obrigatórios.' };
+      const tokens = splitWords(fullName);
+      if (tokens.length < 3) return { ok: false, reason: 'Nome completo deve ter pelo menos 3 palavras' };
+      if (normalizeName(tokens[0]) !== normalizeName(firstName)) return { ok: false, reason: 'Primeiro nome não bate' };
+      if (normalizeName(tokens[tokens.length - 1]) !== normalizeName(surname)) return { ok: false, reason: 'Apelido não bate' };
+      return { ok: true };
+    }
+
+    function validateNickname(nick) {
+      const re = /^[\p{L}0-9 ]+$/u;
+      return re.test(nick.trim()) ? { ok: true } : { ok: false, reason: 'Nickname inválido' };
+    }
+
+    function passwordStrength(pw) {
+      if (!pw || pw.length < 6) return { ok: false, reason: 'Senha mínima 6 caracteres' };
+      const types = [/[a-z]/.test(pw), /[A-Z]/.test(pw), /\d/.test(pw), /[^\p{L}\d ]/u.test(pw)].filter(Boolean).length;
+      return (pw.length >= 8 && types >= 2) ? { ok: true, strong: true } : { ok: true, strong: false };
+    }
+
+    function loadUsers() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { return []; } }
+    function saveUsers(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+    function countAccountsForPhone(phone) { return loadUsers().filter(u => u.phone === phone).length; }
+
+    const status = document.getElementById('status');
+    function setStatus(text, type = '') {
+      status.textContent = text;
+      status.className = `message msg-${type}`;
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      setStatus('Validando...', '');
+      const phone = document.getElementById('phone').value;
+      const email = document.getElementById('email').value;
+      const fullname = document.getElementById('fullname').value;
+      const firstname = document.getElementById('firstname').value;
+      const surname = document.getElementById('surname').value;
+      const nickname = document.getElementById('nickname').value;
+      const password = document.getElementById('password').value;
+      const province = provinceInput.value;
+
+      if (!province) { setStatus('Escolha uma província', 'error'); return; }
+      const vPhone = validatePhone(phone); if (!vPhone.ok) { setStatus(vPhone.reason, 'error'); return; }
+      const vEmail = validateEmail(email); if (!vEmail.ok) { setStatus(vEmail.reason, 'error'); return; }
+      const vNames = validateNames(fullname, firstname, surname); if (!vNames.ok) { setStatus(vNames.reason, 'error'); return; }
+      const vNick = validateNickname(nickname); if (!vNick.ok) { setStatus(vNick.reason, 'error'); return; }
+      const vPass = passwordStrength(password); if (!vPass.ok) { setStatus(vPass.reason, 'error'); return; }
+      const existing = countAccountsForPhone(vPhone.phone); if (existing >= 3) { setStatus('Número já registado 3 vezes', 'error'); return; }
+
+      const hashedPassword = simpleHash(password);
+
+      const users = loadUsers();
+      const newUser = {
+        id: generateUniqueId(),
+        phone: vPhone.phone, email: email.trim(), fullname: fullname.trim(),
+        firstname: firstname.trim(), surname: surname.trim(), nickname: nickname.trim(),
+        password: hashedPassword, province: province, created: new Date().toISOString(),
+        avatar: '', stats: { likes: 0, posts: 0, friends: 0 }, nameEditDate: null
+      };
+      users.push(newUser); saveUsers(users);
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+
+      // Mensagem centralizada
+      const msg = document.createElement('div');
+      msg.style.position = 'fixed'; msg.style.top = '50%'; msg.style.left = '50%'; msg.style.transform = 'translate(-50%,-50%)';
+      msg.style.fontSize = '28px'; msg.style.color = '#00f5ff'; msg.style.background = 'rgba(0,0,0,0.6)';
+      msg.style.padding = '20px 28px'; msg.style.borderRadius = '12px'; msg.style.zIndex = '9999';
+      msg.style.textAlign = 'center'; msg.textContent = 'Bem vindo, Sua visão é a Nossa Missão';
+      document.body.appendChild(msg);
+      setTimeout(() => { document.body.removeChild(msg); }, 3000);
+
+      setStatus('Cadastro concluído! Redirecionando...', 'success');
+      setTimeout(() => window.location.href = 'eyesopenmoz.html', 2000);
+    });
+
+    function showLogin() { window.location.href = 'entrar.html'; }
+  </script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eyes 42h - Guardar + Publicar + Música</title>
+
+  <!-- FONTS + ICONS -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Dancing+Script:wght@700&family=Roboto+Mono&family=Pacifico&family=Caveat&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Cropper.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #00d9ff;
+      --neon: #00ffea;
+      --bg: #0a0a1a;
+      --glass: rgba(255,255,255,0.08);
+      --glow: 0 0 20px rgba(0,217,255,0.5);
+      --success: #00ff88;
+      --warning: #ffcc00;
+      --hack: #0f0;
+      --smoke: rgba(0,0,0,0.6);
+      --tech: #00ffff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg); color: white; font-family: 'Poppins', sans-serif;
+      min-height: 100vh; padding: 1.5rem; display: flex; justify-content: center;
+    }
+
+    /* TELA INICIAL */
+    .lite-container { max-width: 400px; width: 100%; text-align: center; }
+    h1 { color: var(--neon); font-size: 2.2rem; margin-bottom: 1.5rem; text-shadow: 0 0 15px rgba(0,255,234,0.6); }
+
+    .lite-options { display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0; }
+    .lite-btn { padding: 1.2rem; border-radius: 50px; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: 0.3s; border: none; display: flex; align-items: center; justify-content: center; gap: 0.8rem; }
+    .btn-photo { background: var(--primary); color: #000; }
+    .btn-photo:hover { background: var(--neon); transform: translateY(-2px); }
+    .btn-back { background: #333; color: white; margin-top: 1rem; }
+    .btn-back:hover { background: #555; }
+
+    input[type="file"] { width: 100%; padding: 1rem; margin: 1rem 0; border-radius: 16px; border: 2px dashed var(--primary); background: var(--glass); color: white; cursor: pointer; }
+    .preview-circle { width: 140px; height: 140px; border-radius: 50%; margin: 1.5rem auto; object-fit: cover; border: 5px solid var(--primary); box-shadow: var(--glow); display: none; cursor: pointer; transition: 0.3s; }
+
+    /* EDITOR FOTO - TELA CHEIA */
+    .editor { 
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: #000; z-index: 9999; justify-content: center; align-items: center; 
+      flex-direction: column; overflow: hidden;
+    }
+    .main-img { 
+      max-width: 100%; max-height: 100vh; object-fit: contain; border-radius: 0; 
+      position: relative; z-index: 1; cursor: move;
+    }
+
+    .close-x { 
+      position: absolute; top: 20px; right: 20px; font-size: 2rem; color: white; 
+      background: rgba(0,0,0,0.5); width: 50px; height: 50px; border-radius: 50%; 
+      display: flex; align-items: center; justify-content: center; cursor: pointer; 
+      backdrop-filter: blur(8px); z-index: 100;
+    }
+
+    /* OPÇÕES À ESQUERDA */
+    .left-menu { 
+      position: fixed; left: 16px; top: 50%; transform: translateY(-50%); 
+      background: var(--glass); padding: 1.5rem 1rem; border-radius: 30px; 
+      border: 1px solid rgba(0,217,255,0.3); backdrop-filter: blur(15px); 
+      display: flex; flex-direction: column; gap: 1.8rem; box-shadow: var(--glow); 
+      z-index: 100;
+    }
+    .menu-icon { 
+      width: 50px; height: 50px; background: rgba(0,217,255,0.2); color: white; 
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+      font-size: 1.3rem; cursor: pointer; transition: 0.3s;
+    }
+    .menu-icon.active, .menu-icon:hover { 
+      background: var(--primary); color: #000; transform: scale(1.1); 
+    }
+
+    /* PAINÉIS À ESQUERDA */
+    .panel { 
+      position: fixed; left: 90px; top: 50%; transform: translateY(-50%); 
+      width: 260px; background: var(--glass); padding: 1.5rem; border-radius: 20px; 
+      border: 1px solid rgba(0,217,255,0.3); backdrop-filter: blur(15px); 
+      box-shadow: var(--glow); display: none; z-index: 99; animation: slideIn 0.3s ease;
+    }
+    .panel.active { display: block; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-20px) translateY(-50%); } to { opacity: 1; transform: translateY(-50%); } }
+
+    .panel h4 { margin-bottom: 1rem; color: var(--neon); }
+    .panel input, .panel button, .panel label { 
+      width: 100%; padding: 0.9rem; margin: 0.6rem 0; border-radius: 14px; 
+      border: 1px solid var(--primary); background: rgba(0,217,255,0.1); color: white; 
+      text-align: center; cursor: pointer;
+    }
+    .panel button { background: var(--primary); color: #000; font-weight: 600; }
+    .panel label { display: block; }
+
+    .color-pick { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; display: inline-block; margin: 0 4px; }
+    .color-pick.active { border-color: white; transform: scale(1.2); }
+
+    /* FUMO PRETO */
+    .smoke-overlay { 
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+      background: var(--smoke); pointer-events: none; opacity: 0; 
+      transition: opacity 0.5s ease; z-index: 2; backdrop-filter: blur(2px);
+    }
+    .smoke-overlay.active { opacity: 1; }
+
+    .text-drag { 
+      position: absolute; color: white; font-weight: bold; font-size: 36px; 
+      text-shadow: 0 0 10px #000; cursor: move; user-select: none; padding: 6px 12px; 
+      background: rgba(0,0,0,0.5); border-radius: 12px; backdrop-filter: blur(4px); 
+      z-index: 3;
+    }
+
+    /* BOTÕES DE AÇÃO */
+    .action-buttons {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 1rem; z-index: 100;
+    }
+    .action-btn {
+      width: 60px; height: 60px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-size: 1.5rem;
+      cursor: pointer; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      animation: pulse 2s infinite;
+    }
+    .save-btn { background: var(--warning); color: #000; }
+    .publish-btn { background: var(--success); color: #000; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 20px rgba(0,0,0,0.5); } 50% { box-shadow: 0 0 30px rgba(0,0,0,0.8); } }
+
+    /* CONTAGEM TECNOLÓGICA */
+    .countdown-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95); z-index: 99999; display: none;
+      justify-content: center; align-items: center; flex-direction: column;
+      backdrop-filter: blur(10px);
+    }
+    .countdown-digit {
+      font-family: 'Roboto Mono', monospace; font-size: 8rem; font-weight: 700;
+      color: var(--tech); text-shadow: 0 0 30px var(--tech), 0 0 60px var(--tech);
+      animation: glitch 0.3s infinite alternate;
+    }
+    .countdown-text {
+      font-size: 1.8rem; margin-top: 1rem; color: var(--neon);
+      text-shadow: 0 0 15px var(--neon); animation: pulseText 1.5s infinite;
+    }
+    @keyframes glitch {
+      0% { text-shadow: 0 0 30px var(--tech), 0 0 60px var(--tech); }
+      100% { text-shadow: -2px 0 0 #f00, 2px 0 0 #0f0, 0 -2px 0 #00f; }
+    }
+    @keyframes pulseText {
+      0%,100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    /* CROP 40VH */
+    .crop-hack { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 520px; height: 40vh; background: #000; border-radius: 20px; z-index: 9999; box-shadow: 0 0 40px rgba(0,255,0,0.7); border: 2px solid var(--hack); overflow: hidden; }
+    .crop-hack.active { display: block; }
+    .crop-hack-header { padding: 0.8rem 1rem; background: rgba(0,255,0,0.15); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--hack); color: var(--hack); font-family: 'Courier New', monospace; }
+    .crop-hack-body { height: calc(100% - 90px); padding: 0.8rem; }
+    .crop-hack-img { width: 100%; height: 100%; object-fit: contain; }
+    .crop-hack-footer { position: absolute; bottom: 0; left: 0; width: 100%; padding: 0.8rem; background: rgba(0,0,0,0.95); display: flex; gap: 0.8rem; justify-content: center; border-top: 1px solid var(--hack); }
+    .crop-hack-btn { flex: 1; padding: 0.7rem; border-radius: 50px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: 1px solid var(--hack); color: var(--hack); background: transparent; transition: 0.3s; }
+    .crop-hack-btn.apply { background: var(--hack); color: #000; }
+
+    .music-info { font-size: 0.9rem; color: var(--neon); margin-top: 0.5rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA INICIAL -->
+  <div class="lite-container">
+    <h1>Eyes 42h</h1>
+    <div class="lite-options">
+      <button class="lite-btn btn-photo" onclick="openPhotoMode()">
+        Publicar Foto
+      </button>
+    </div>
+
+    <div id="photoSection" style="display:none;">
+      <input type="file" id="photoInput" accept="image/*" />
+      <img id="photoPreview" class="preview-circle" src="" alt="Toque para editar" />
+      <button class="btn-back" onclick="backToMain()">Voltar</button>
+    </div>
+
+    <button class="btn-back" onclick="window.location.href='menu1.1.1.html'" style="margin-top:2rem;">Voltar ao Menu</button>
+  </div>
+
+  <!-- EDITOR FOTO TELA CHEIA -->
+  <div class="editor" id="editor">
+    <div class="close-x" onclick="closeEditor()">X</div>
+    
+    <!-- IMAGEM + FUMO + TEXTO -->
+    <div style="position:relative; width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+      <img id="mainImage" class="main-img" src="" />
+      <div id="smokeOverlay" class="smoke-overlay"></div>
+    </div>
+
+    <!-- OPÇÕES À ESQUERDA -->
+    <div class="left-menu">
+      <div class="menu-icon active" onclick="showPanel('crop')"><i class="fas fa-crop"></i></div>
+      <div class="menu-icon" onclick="toggleSmoke()"><i class="fas fa-smog"></i></div>
+      <div class="menu-icon" onclick="showPanel('text')"><i class="fas fa-font"></i></div>
+      <div class="menu-icon" onclick="showPanel('music')"><i class="fas fa-music"></i></div>
+    </div>
+
+    <!-- PAINÉIS -->
+    <div class="panel" id="cropPanel">
+      <h4>Cortar</h4>
+      <button onclick="openCropHack()">Abrir Corte</button>
+    </div>
+
+    <div class="panel" id="textPanel">
+      <h4>Texto</h4>
+      <input type="text" id="textInput" placeholder="Digite aqui..." />
+      <div style="text-align:center; margin:0.5rem 0;">
+        <div class="color-pick" style="background:#fff;" onclick="setTextColor('#fff')"></div>
+        <div class="color-pick" style="background:#0f0;" onclick="setTextColor('#0f0')"></div>
+        <div class="color-pick" style="background:#0ff;" onclick="setTextColor('#0ff')"></div>
+        <div class="color-pick" style="background:#ff0;" onclick="setTextColor('#ff0')"></div>
+        <div class="color-pick" style="background:#f0f;" onclick="setTextColor('#f0f')"></div>
+      </div>
+      <button onclick="addText()">Adicionar</button>
+    </div>
+
+    <div class="panel" id="musicPanel">
+      <h4>Música</h4>
+      <label>
+        <input type="file" id="musicInput" accept="audio/*" style="display:none;" onchange="loadMusic(this)" />
+        Escolher Música (≤10MB)
+      </label>
+      <div id="musicName" class="music-info">Nenhuma música</div>
+    </div>
+
+    <!-- BOTÕES DE AÇÃO -->
+    <div class="action-buttons">
+      <div class="action-btn save-btn" onclick="saveDraft()" title="Guardar">
+        <i class="fas fa-save"></i>
+      </div>
+      <div class="action-btn publish-btn" onclick="publishPhotoStory()" title="Publicar">
+        <i class="fas fa-paper-plane"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTAGEM TECNOLÓGICA -->
+  <div class="countdown-overlay" id="countdown">
+    <div class="countdown-digit" id="countdownDigit">3</div>
+    <div class="countdown-text">PUBLICANDO...</div>
+  </div>
+
+  <!-- CROP 40VH -->
+  <div class="crop-hack" id="cropHack">
+    <div class="crop-hack-header">
+      <h4>CORTAR</h4>
+      <div class="crop-hack-close" onclick="closeCropHack()">X</div>
+    </div>
+    <div class="crop-hack-body">
+      <img id="cropHackImg" class="crop-hack-img" src="" />
+    </div>
+    <div class="crop-hack-footer">
+      <button class="crop-hack-btn apply" onclick="applyCropHack()">APLICAR</button>
+      <button class="crop-hack-btn" onclick="closeCropHack()">CANCELAR</button>
+    </div>
+  </div>
+
+  <script>
+    let imgSrc = '', cropperHack = null, texts = [], smokeActive = false, textColor = '#fff';
+    let musicBlob = null, musicName = 'Nenhuma música';
+
+    // MODO FOTO
+    function openPhotoMode() {
+      document.querySelector('.lite-options').style.display = 'none';
+      document.getElementById('photoSection').style.display = 'block';
+    }
+
+    function backToMain() {
+      document.querySelector('.lite-options').style.display = 'flex';
+      document.getElementById('photoSection').style.display = 'none';
+      document.getElementById('photoInput').value = '';
+      document.getElementById('photoPreview').style.display = 'none';
+      imgSrc = '';
+    }
+
+    document.getElementById('photoInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        imgSrc = ev.target.result;
+        const prev = document.getElementById('photoPreview');
+        prev.src = imgSrc;
+        prev.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('photoPreview').onclick = () => {
+      if (!imgSrc) return;
+      document.getElementById('mainImage').src = imgSrc;
+      document.getElementById('editor').style.display = 'flex';
+      showPanel('crop');
+      loadDraft(); // Carrega rascunho se existir
+    };
+
+    function closeEditor() {
+      document.getElementById('editor').style.display = 'none';
+      texts.forEach(t => t.remove());
+      texts = [];
+      document.getElementById('smokeOverlay').classList.remove('active');
+      smokeActive = false;
+      musicBlob = null;
+      document.getElementById('musicName').textContent = 'Nenhuma música';
+    }
+
+    function showPanel(panel) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(panel + 'Panel').classList.add('active');
+      document.querySelectorAll('.menu-icon').forEach(i => i.classList.remove('active'));
+      event.target.closest('.menu-icon').classList.add('active');
+    }
+
+    // FUMO PRETO
+    function toggleSmoke() {
+      smokeActive = !smokeActive;
+      document.getElementById('smokeOverlay').classList.toggle('active', smokeActive);
+      event.target.closest('.menu-icon').classList.toggle('active', smokeActive);
+    }
+
+    // TEXTO
+    function setTextColor(c) { textColor = c; }
+    function addText() {
+      const t = document.getElementById('textInput').value.trim();
+      if (!t) return;
+      const el = document.createElement('div');
+      el.className = 'text-drag';
+      el.textContent = t;
+      el.style.color = textColor;
+      el.style.left = '50%'; el.style.top = '50%';
+      el.style.transform = 'translate(-50%, -50%)';
+      document.getElementById('editor').appendChild(el);
+      texts.push(el);
+      dragElement(el);
+      document.getElementById('textInput').value = '';
+    }
+
+    function dragElement(el) {
+      let x = 0, y = 0, px = 0, py = 0;
+      el.onmousedown = el.ontouchstart = e => {
+        e.preventDefault();
+        px = e.clientX || e.touches[0].clientX;
+        py = e.clientY || e.touches[0].clientY;
+        const move = e => {
+          x = px - (e.clientX || e.touches[0].clientX);
+          y = py - (e.clientY || e.touches[0].clientY);
+          px = e.clientX || e.touches[0].clientX;
+          py = e.clientY || e.touches[0].clientY;
+          el.style.left = (el.offsetLeft - x) + 'px';
+          el.style.top = (el.offsetTop - y) + 'px';
+        };
+        document.onmousemove = document.ontouchmove = move;
+        document.onmouseup = document.ontouchend = () => {
+          document.onmousemove = document.ontouchmove = document.onmouseup = document.ontouchend = null;
+        };
+      };
+    }
+
+    // MÚSICA
+    function loadMusic(input) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Música muito grande! Máximo 10MB.');
+        return;
+      }
+      musicBlob = URL.createObjectURL(file);
+      musicName = file.name.length > 20 ? file.name.substring(0, 17) + '...' : file.name;
+      document.getElementById('musicName').textContent = musicName;
+    }
+
+    // CROP
+    function openCropHack() {
+      const modal = document.getElementById('cropHack');
+      const img = document.getElementById('cropHackImg');
+      modal.classList.add('active');
+      img.src = imgSrc;
+      setTimeout(() => {
+        if (cropperHack) cropperHack.destroy();
+        cropperHack = new Cropper(img, { aspectRatio: 1, viewMode: 1, autoCropArea: 0.8 });
+      }, 100);
+    }
+
+    function closeCropHack() {
+      document.getElementById('cropHack').classList.remove('active');
+      if (cropperHack) { cropperHack.destroy(); cropperHack = null; }
+    }
+
+    function applyCropHack() {
+      if (!cropperHack) return;
+      cropperHack.getCroppedCanvas({ width: 1080 }).toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        document.getElementById('mainImage').src = url;
+        imgSrc = url;
+        closeCropHack();
+      }, 'image/jpeg', 0.95);
+    }
+
+    // GUARDAR RASCUNHO
+    function saveDraft() {
+      const draft = {
+        imgSrc,
+        texts: texts.map(t => ({
+          text: t.textContent,
+          color: t.style.color,
+          left: t.style.left,
+          top: t.style.top
+        })),
+        smoke: smokeActive,
+        music: musicBlob,
+        musicName
+      };
+      localStorage.setItem('eyes42h_draft', JSON.stringify(draft));
+      alert('Rascunho guardado!');
+    }
+
+    function loadDraft() {
+      const draft = JSON.parse(localStorage.getItem('eyes42h_draft'));
+      if (!draft) return;
+
+      imgSrc = draft.imgSrc;
+      document.getElementById('mainImage').src = imgSrc;
+
+      draft.texts.forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'text-drag';
+        el.textContent = t.text;
+        el.style.color = t.color;
+        el.style.left = t.left;
+        el.style.top = t.top;
+        document.getElementById('editor').appendChild(el);
+        texts.push(el);
+        dragElement(el);
+      });
+
+      if (draft.smoke) {
+        smokeActive = true;
+        document.getElementById('smokeOverlay').classList.add('active');
+      }
+
+      if (draft.music) {
+        musicBlob = draft.music;
+        musicName = draft.musicName;
+        document.getElementById('musicName').textContent = musicName;
+      }
+    }
+
+    // PUBLICAR
+    function publishPhotoStory() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        if (smokeActive) {
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        texts.forEach(t => {
+          const rect = t.getBoundingClientRect();
+          const imgRect = document.getElementById('mainImage').getBoundingClientRect();
+          const x = rect.left - imgRect.left + 15;
+          const y = rect.top - imgRect.top + 40;
+          ctx.font = 'bold 36px Poppins';
+          ctx.fillStyle = t.style.color;
+          ctx.fillText(t.textContent, x, y);
+        });
+
+        const final = canvas.toDataURL('image/jpeg', 0.9);
+        saveStory(final, musicBlob, musicName);
+        startCountdown();
+      };
+      img.src = imgSrc;
+    }
+
+    function saveStory(src, music, musicName) {
+      const s = JSON.parse(localStorage.getItem('eyes42h_stories') || '[]');
+      s.unshift({ type: 'photo', src, music, musicName, timestamp: Date.now() });
+      if (s.length > 5) s.pop();
+      localStorage.setItem('eyes42h_stories', JSON.stringify(s));
+      localStorage.setItem('eyes_published', 'true');
+      localStorage.removeItem('eyes42h_draft'); // Limpa rascunho
+    }
+
+    function startCountdown() {
+      document.getElementById('countdown').style.display = 'flex';
+      let count = 3;
+      const digit = document.getElementById('countdownDigit');
+      
+      const timer = setInterval(() => {
+        count--;
+        digit.textContent = count;
+        if (count <= 0) {
+          clearInterval(timer);
+          setTimeout(() => {
+            window.location.href = 'menu1.1.1.html';
+          }, 500);
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
